@@ -1,0 +1,19 @@
+- Move to the Tubemogul repo
+- Add documentation
+- Add more tests and benchmarks
+- Application configuration
+  - load config from file or env variables or from flag
+- 1 cache worker:
+  - track current status start timestamp
+  - function that takes the data from the cache and pushes it to disk
+  - function that loads the data from json on start
+  - cache entry expiration policy
+- IP limitations on the http api
+- the http api engine
+  - access the list of hosts in the cache  /api/hosts
+  - access checks results by host          /api/host/{hostName}
+  - access check list by host              /api/host/{hostName}/checks
+  - access the list of checks on a host    /api/checks/{hostName}
+  - access a check on a specific host      /api/check/{hostName}/{checkName}
+  - access by check on all hosts           /api/reports/{checkName}
+  - additionnal fields based on hiera repo

@@ -1,0 +1,12 @@
+  {
+    {{range $key, $value := .additions}}
+      "{{ $key }}": "{{ $value }}",
+    {{end}}
+    "hostname": "{{.check.host}}",
+    "service": "{{.check.name}}",
+    "currentStatus": {
+      "status": "{{.check.status}}",
+      "message": "{{.check.message}}",
+      "lastStatusAt": "{{.check.timestamp}}"
+    }
+  }
