@@ -1,11 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"text/template"
 )
+
+var tmplRoot string
 
 // statusString returns the corresponding string to the nagios status
 func statusString(state int16) string {
@@ -20,10 +25,18 @@ func statusString(state int16) string {
 	return "Unknown"
 }
 
+// ToJSONString is a function that takes an interface as output and formats it for
+// json output in return
+func ToJSONString(v interface{}) string {
+	bytesOutput, _ := json.Marshal(v)
+	return string(bytesOutput)
+}
+
 // rootHandler just renders the root.tmpl that explains the api calls usage
 func rootHandler(w http.ResponseWriter, r *http.Request) {
+	tmplPath := filepath.Join(tmplRoot, "root.tmpl")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	t := template.Must(template.ParseFiles("templates/root.tmpl"))
+	t := template.Must(template.ParseFiles(tmplPath))
 	t.Execute(w, nil)
 }
 
@@ -31,17 +44,20 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 // on all the hosts, each elements defined based on the reports_element.tmpl
 // template
 func reportsHandler(w http.ResponseWriter, r *http.Request) {
+	tmplName := "reports_element.tmpl"
+	tmplPath := filepath.Join(tmplRoot, tmplName)
 	w.Header().Set("Content-Type", "application/json")
-	t := template.Must(template.ParseFiles("templates/reports_element.tmpl"))
+	fMaps := template.FuncMap{"tojson": ToJSONString}
+	t := template.Must(template.New(tmplName).Funcs(fMaps).ParseFiles(tmplPath))
 	io.WriteString(w, "[")
 	i := 1
 	for host, svcs := range cache {
 		j := 1
 		for svc, chk := range svcs {
-			c := map[string]map[string]string{
-				"check": map[string]string{"host": host, "name": svc, "status": statusString(chk.state), "message": chk.output, "timestamp": fmt.Sprint(chk.timestamp)},
-				// additions will be used to inject custom-defined fields
-				"additions": map[string]string{"Addition field example": "and my value"},
+			c := map[string]map[string]interface{}{
+				"check": map[string]interface{}{"host": host, "name": svc, "status": statusString(chk.state), "message": chk.output, "timestamp": fmt.Sprint(chk.timestamp)},
+				// custom will be used to inject custom-defined fields
+				"custom": getCustomFields(host, svc),
 			}
 			t.Execute(w, c)
 			// This part just takes care of adding a coma or not between the elements
@@ -56,9 +72,27 @@ func reportsHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "]\n")
 }
 
+// setIfPathExists validates that the given path exists before assigning it to
+// the given variable
+func setIfPathExists(dir string, varToSet *string) error {
+	if _, err := os.Stat(dir); err != nil {
+		return err
+	}
+	*varToSet = dir
+	return nil
+}
+
 // initAPIServer starts the API HTTP server. This is where the routes are
-// defined
-func initAPIServer(listenerIP string, port uint) {
+// defined. The customFieldRoot is the root of the hierarchy of yaml files used
+// for the custom fields. The templatesRoot is the root directory where to find
+// the templates used by the API
+func initAPIServer(listenerIP string, port uint, customFieldRoot string, templatesRoot string) {
+	// Init custom fields
+	var customFRoot string
+	setIfPathExists(customFieldRoot, &customFRoot)
+	loadCustomFields(customFRoot)
+
+	setIfPathExists(templatesRoot, &tmplRoot)
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/api/reports", reportsHandler)
 	http.ListenAndServe(fmt.Sprint(listenerIP, ":", port), nil)
