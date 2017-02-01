@@ -16,6 +16,42 @@ The tool is split into 3 main parts:
   in a json format in response to a call on `/api/reports` based on a template.
   The rest of the calls will display a usage summary based on another template
 
+## Usage
+
+### Command-line options
+
+To try to stick to the 12 factors principle, our configuration can be provider
+from command-line arguments but also from environment variables. Note that the
+command-line arguments have a higher priority than the environment variables.
+
+```
+Usage of nscapi:
+  -api-ip string
+    	IP the API should listen on. Default to the NSCAPI_API_IP environment variable. Fallback: 0.0.0.0 (default "0.0.0.0")
+  -api-port uint
+    	Port the API should listen on. Default to the NSCAPI_API_PORT environment variable. Fallback: 8080 (default 8080)
+  -nsca-server-encryption uint
+    	Number corresponding to the encryption to be used by the NSCA server. Default to the NSCAPI_NSCA_ENCRYPTION environment variable. Fallback: 0. See 'DECRYPTION METHOD' on https://github.com/NagiosEnterprises/nsca/blob/master/sample-config/nsca.cfg.in for more details. Must be <27.
+  -nsca-server-ip string
+    	IP the NSCA server should listen on. Default to the NSCAPI_NSCA_IP environment variable. Fallback: 0.0.0.0 (default "0.0.0.0")
+  -nsca-server-password string
+    	Password the NSCA server should use. Default to the NSCAPI_NSCA_PASSWORD environment variable. Fallback: ''
+  -nsca-server-port uint
+    	Port the NSCA server should listen on. Default to the NSCAPI_NSCA_PORT environment variable. Fallback: 5667 (default 5667)
+```
+
+In this example, the API server will run on port 8081 (listening on all
+available network interfaces), the NSCA server will be listening on localhost
+on port 5668, without encryption:
+```
+export NSCAPI_NSCA_IP=localhost
+./nscapi -nsca-server-port 5668
+```
+Note that we recommend not to mix the environment variables and command-line
+arguments as it might end up being confusing. Just use either of them and stick
+to it for readability (the application has no problem handling both but whoever
+take back the work after might be confused).
+
 ## Custom fields
 
 A custom field is a key-value couple that is not contained in the nsca check
