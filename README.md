@@ -36,3 +36,39 @@ The level of importance is defined as follows:
   defined in `common.yaml` will be applied.
 * `service/%{hostgroup}/%{check name}.yaml` has the highest priority. Any field value in
   this file will overwrite the values of the previously defined custom fields.
+
+## Using the Makefile
+
+The Makefile is used as a helper for building and testing the project. Current
+capabilities:
+
+ * `make lint`: runs golint on your files (requires `github.com/golang/lint/golint` installed)
+ * `make fmt`: checks that the files are compliant with the gofmt format
+ * `make vet`: runs `go tool vet` on your files to ensure there's no problems
+ * `make test`: runs `make lint`, `make fmt`, `make vet` before running all the
+   test, printing also the percentage of code coverage
+ * `make race`: runs the tests with the `-race` option to detect race conditions
+ * `make bench`: runs the benchmarks
+ * `make gocov`: runs a gocov report (requires `github.com/axw/gocov/gocov`)
+ * `make dep`: gets (with update option `-u`) the go dependencies required by
+   the application
+ * `make build`: runs `make dep` and `make test` before running a clean and
+   build the binary
+ * `make install`: runs `make dep` and `make test` before running a clean and
+   install the application
+ * `make` / `make all`: run `make test` and `make race`
+
+## Contributions
+
+Contributions to this project are welcome, though please
+[file an issue](https://github.com/tubemogul/nscapi/issues/new).
+before starting work on anything major as someone else could already be working
+on it.
+
+Contributions that do not provide the corresponding tests will most likely not
+be accepted (we can help building the tests if needed).
+
+Contributions that do not pass the basic gofmt, vet and other basic checks
+provided in the Makefile will not be accepted. It's just a question of trying to
+keep a basic code standard. Thanks for your help! :)
+
