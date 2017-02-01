@@ -1,6 +1,6 @@
   {
-    {{range $key, $value := .additions}}
-      "{{ $key }}": "{{ $value }}",
+    {{range $key, $value := .custom}}
+      "{{ $key }}": {{ tojson $value }},
     {{end}}
     "hostname": "{{.check.host}}",
     "service": "{{.check.name}}",

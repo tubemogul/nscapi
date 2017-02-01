@@ -25,20 +25,31 @@ from command-line arguments but also from environment variables. Note that the
 command-line arguments have a higher priority than the environment variables.
 
 ```
-Usage of nscapi:
+Usage of ./nscapi:
   -api-ip string
     	IP the API should listen on. Default to the NSCAPI_API_IP environment variable. Fallback: 0.0.0.0 (default "0.0.0.0")
   -api-port uint
     	Port the API should listen on. Default to the NSCAPI_API_PORT environment variable. Fallback: 8080 (default 8080)
-  -nsca-server-encryption uint
-    	Number corresponding to the encryption to be used by the NSCA server. Default to the NSCAPI_NSCA_ENCRYPTION environment variable. Fallback: 0. See 'DECRYPTION METHOD' on https://github.com/NagiosEnterprises/nsca/blob/master/sample-config/nsca.cfg.in for more details. Must be <27.
+
+  -api-templates-root string
+    	Root directory the API should use to look for its templates (root.tmpl and reports_element.tmpl). Default to the NSCAPI_API_TEMPLATES_ROOT environment variable. Fallback: templates (default "templates")
+
+  -api-custom-fields-root string
+    	Root directory the API should use as root of the custom fields hierarchy. Default to the NSCAPI_API_CUSTOM_FIELDS_ROOT environment variable. Fallback: custom_fields (default "custom_fields")
+
   -nsca-server-ip string
     	IP the NSCA server should listen on. Default to the NSCAPI_NSCA_IP environment variable. Fallback: 0.0.0.0 (default "0.0.0.0")
-  -nsca-server-password string
-    	Password the NSCA server should use. Default to the NSCAPI_NSCA_PASSWORD environment variable. Fallback: ''
   -nsca-server-port uint
     	Port the NSCA server should listen on. Default to the NSCAPI_NSCA_PORT environment variable. Fallback: 5667 (default 5667)
+
+  -nsca-server-password string
+    	Password the NSCA server should use. Default to the NSCAPI_NSCA_PASSWORD environment variable. Fallback: ''
+
+  -nsca-server-encryption uint
+    	Number corresponding to the encryption to be used by the NSCA server. Default to the NSCAPI_NSCA_ENCRYPTION environment variable. Fallback: 0. See 'DECRYPTION METHOD' on https://github.com/NagiosEnterprises/nsca/blob/master/sample-config/nsca.cfg.in for more details. Must be <27.
+
 ```
+The list of encryption algorithm code number can be found [here](https://github.com/NagiosEnterprises/nsca/blob/master/sample-config/nsca.cfg.in)
 
 In this example, the API server will run on port 8081 (listening on all
 available network interfaces), the NSCA server will be listening on localhost

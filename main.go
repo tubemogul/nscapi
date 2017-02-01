@@ -12,12 +12,14 @@ import (
 var (
 	q   *lfc.Queue
 	cfg struct {
-		apiIP          string
-		apiPort        uint
-		nscaIP         string
-		nscaPort       uint
-		nscaPassword   string
-		nscaEncryption uint
+		apiIP              string
+		apiPort            uint
+		apiCustomFieldRoot string
+		apiTemplatesRoot   string
+		nscaIP             string
+		nscaPort           uint
+		nscaPassword       string
+		nscaEncryption     uint
 	}
 )
 
@@ -86,6 +88,8 @@ func getUintFromEnv(varName string, defaultValue uint, bitSize int) uint {
 func initConfig() {
 	flag.StringVar(&cfg.apiIP, "api-ip", getStringFromEnv("NSCAPI_API_IP", "0.0.0.0"), "IP the API should listen on. Default to the NSCAPI_API_IP environment variable. Fallback: 0.0.0.0")
 	flag.UintVar(&cfg.apiPort, "api-port", getUintFromEnv("NSCAPI_API_PORT", 8080, 32), "Port the API should listen on. Default to the NSCAPI_API_PORT environment variable. Fallback: 8080")
+	flag.StringVar(&cfg.apiCustomFieldRoot, "api-custom-fields-root", getStringFromEnv("NSCAPI_API_CUSTOM_FIELDS_ROOT", "custom_fields"), "Root directory the API should use as root of the custom fields hierarchy. Default to the NSCAPI_API_CUSTOM_FIELDS_ROOT environment variable. Fallback: custom_fields")
+	flag.StringVar(&cfg.apiTemplatesRoot, "api-templates-root", getStringFromEnv("NSCAPI_API_TEMPLATES_ROOT", "templates"), "Root directory the API should use to look for its templates (root.tmpl and reports_element.tmpl). Default to the NSCAPI_API_TEMPLATES_ROOT environment variable. Fallback: templates")
 	flag.StringVar(&cfg.nscaIP, "nsca-server-ip", getStringFromEnv("NSCAPI_NSCA_IP", "0.0.0.0"), "IP the NSCA server should listen on. Default to the NSCAPI_NSCA_IP environment variable. Fallback: 0.0.0.0")
 	flag.UintVar(&cfg.nscaPort, "nsca-server-port", getUintFromEnv("NSCAPI_NSCA_PORT", 5667, 16), "Port the NSCA server should listen on. Default to the NSCAPI_NSCA_PORT environment variable. Fallback: 5667")
 	flag.StringVar(&cfg.nscaPassword, "nsca-server-password", getStringFromEnv("NSCAPI_NSCA_PASSWORD", ""), "Password the NSCA server should use. Default to the NSCAPI_NSCA_PASSWORD environment variable. Fallback: ''")
@@ -104,7 +108,7 @@ func main() {
 	go cacheWorker(true)
 
 	// Start the API inside a routine
-	go initAPIServer(cfg.apiIP, cfg.apiPort)
+	go initAPIServer(cfg.apiIP, cfg.apiPort, cfg.apiCustomFieldRoot, cfg.apiTemplatesRoot)
 
 	// Start the nsca server
 	cfg := nsca.NewConfig(cfg.nscaIP, uint16(cfg.nscaPort), int(cfg.nscaEncryption), cfg.nscaPassword, queueData)
