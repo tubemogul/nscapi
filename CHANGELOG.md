@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.0.0] - 2017-02-01
 ### Added
 - Server that receive nsca calls and put them in a non-locking queue
 - Worker that reads from the non-locking queue and put the data in a cache
