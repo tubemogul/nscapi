@@ -26,7 +26,8 @@ func statusString(state int16) string {
 }
 
 // ToJSONString is a function that takes an interface as output and formats it for
-// json output in return
+// json output in return. Its purpose is to be used in the templates which is
+// the reason wly it is exported
 func ToJSONString(v interface{}) string {
 	bytesOutput, _ := json.Marshal(v)
 	return string(bytesOutput)

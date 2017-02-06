@@ -59,6 +59,8 @@ func processYamlFile(path string) (map[string]interface{}, error) {
 	return returnValue, err
 }
 
+// mergeMapFromCustomFields merges the data from a given customFields key (aka
+// yaml file loaded from the disk) into the map given as reference
 func mergeMapFromCustomFields(reference map[string]interface{}, key *fieldClassifier) {
 	if m, ok := customFields[*key]; ok {
 		for f := range m {
@@ -67,7 +69,8 @@ func mergeMapFromCustomFields(reference map[string]interface{}, key *fieldClassi
 	}
 }
 
-// getCustomFields returns a hash containing the custom fields
+// getCustomFields returns a hash containing the custom fields specific for this
+// hostname and checkName
 func getCustomFields(hostname, checkName string) map[string]interface{} {
 	re, _ := regexp.Compile("[^A-Za-z0-9]$")
 	hostgroup := re.ReplaceAllString(hostname, "")
