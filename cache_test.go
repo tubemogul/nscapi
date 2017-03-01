@@ -32,6 +32,9 @@ func TestUpdateCacheEntry(t *testing.T) {
 	if s.timestamp != 1484527962 {
 		t.Errorf("service foo has wrong timestamp upon creation")
 	}
+	if s.statusFirstSeen != 1484527962 {
+		t.Errorf("service foo has wrong statusFirstSeen upon creation")
+	}
 	if s.output != "OK" {
 		t.Errorf("service foo has wrong output upon creation")
 	}
@@ -40,20 +43,21 @@ func TestUpdateCacheEntry(t *testing.T) {
 	}
 
 	testData := []struct {
-		host      string
-		service   string
-		output    string
-		timestamp uint32
-		state     int16
+		host            string
+		service         string
+		output          string
+		timestamp       uint32
+		statusFirstSeen uint32
+		state           int16
 	}{
 		// Update the same service entry as created previously
-		{"host01", "service foo", "New output", 1484527963, 1},
+		{"host01", "service foo", "New output", 1484527963, 1484527963, 1},
 		// Second service on the same host
-		{"host01", "service bar", "OK", 1484527964, 0},
+		{"host01", "service bar", "OK", 1484527964, 1484527964, 0},
 		// Another host
-		{"host02", "service whatever", "OK", 1484527965, 0},
+		{"host02", "service whatever", "OK", 1484527965, 1484527965, 0},
 		// 2nd service with the same name as the other host
-		{"host02", "service bar", "OK", 1484527966, 0},
+		{"host02", "service bar", "OK", 1484527966, 1484527966, 0},
 	}
 	// Launch all the updates before running the tests
 	for _, tt := range testData {
@@ -69,6 +73,9 @@ func TestUpdateCacheEntry(t *testing.T) {
 		if !ok {
 			t.Errorf("%s should still have a %s entry", tt.host, tt.service)
 		}
+		if s.statusFirstSeen != tt.statusFirstSeen {
+			t.Errorf("entry '%s' has wrong statusFirstSeen. Got %d, expecting %d", tt.service, s.statusFirstSeen, tt.statusFirstSeen)
+		}
 		if s.timestamp != tt.timestamp {
 			t.Errorf("entry '%s' has wrong timestamp. Got %d, expecting %d", tt.service, s.timestamp, tt.timestamp)
 		}
@@ -78,5 +85,11 @@ func TestUpdateCacheEntry(t *testing.T) {
 		if s.state != tt.state {
 			t.Errorf("entry '%s' has wrong state. Got %d, expecting %d", tt.service, s.state, tt.state)
 		}
+	}
+
+	// Check that the statusFirstSeen is kept when updating with the same state
+	updateCacheEntry("host02", "service bar", "OK", 1488527969, 0)
+	if s.statusFirstSeen != 1484527966 {
+		t.Errorf("entry '%s' has wrong statusFirstSeen upon update with no state change. Got %d, expecting %d", "service bar", s.statusFirstSeen, 1484527966)
 	}
 }
