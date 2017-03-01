@@ -56,7 +56,7 @@ func reportsHandler(w http.ResponseWriter, r *http.Request) {
 		j := 1
 		for svc, chk := range svcs {
 			c := map[string]map[string]interface{}{
-				"check": map[string]interface{}{"host": host, "name": svc, "status": statusString(chk.state), "message": chk.output, "timestamp": fmt.Sprint(chk.timestamp)},
+				"check": map[string]interface{}{"host": host, "name": svc, "status": statusString(chk.state), "message": chk.output, "timestamp": fmt.Sprint(chk.timestamp), "statusFirstSeen": fmt.Sprint(chk.statusFirstSeen)},
 				// custom will be used to inject custom-defined fields
 				"custom": getCustomFields(host, svc),
 			}
