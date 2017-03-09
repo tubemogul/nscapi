@@ -10,7 +10,10 @@ import (
 	"text/template"
 )
 
-var tmplRoot string
+var (
+	cFields  customFields
+	tmplRoot string
+)
 
 // statusString returns the corresponding string to the nagios status
 func statusString(state int16) string {
@@ -58,7 +61,7 @@ func reportsHandler(w http.ResponseWriter, r *http.Request) {
 			c := map[string]map[string]interface{}{
 				"check": map[string]interface{}{"host": host, "name": svc, "status": statusString(chk.state), "message": chk.output, "timestamp": fmt.Sprint(chk.timestamp), "statusFirstSeen": fmt.Sprint(chk.statusFirstSeen)},
 				// custom will be used to inject custom-defined fields
-				"custom": getCustomFields(host, svc),
+				"custom": cFields.get(host, svc),
 			}
 			t.Execute(w, c)
 			// This part just takes care of adding a coma or not between the elements
@@ -91,7 +94,7 @@ func initAPIServer(listenerIP string, port uint, customFieldRoot string, templat
 	// Init custom fields
 	var customFRoot string
 	setIfPathExists(customFieldRoot, &customFRoot)
-	loadCustomFields(customFRoot)
+	cFields.load(customFRoot)
 
 	setIfPathExists(templatesRoot, &tmplRoot)
 	http.HandleFunc("/", rootHandler)
