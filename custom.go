@@ -54,7 +54,7 @@ func (f *customFields) processYamlFile(path string) (map[string]interface{}, err
 	returnValue := make(map[string]interface{})
 	fc, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return returnValue, err
 	}
 	err = yaml.Unmarshal(fc, &returnValue)
 
