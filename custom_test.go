@@ -150,3 +150,38 @@ func TestProcessYamlFile(t *testing.T) {
 		}
 	}
 }
+
+var loadUseCases = []struct {
+	filePath    string
+	expectedMap *customFields
+	expectedErr string
+}{
+	{filePath: "testData/customFields", expectedMap: &customFields{fields: map[fieldClassifier]map[string]interface{}{
+		fieldClassifier{hostgroup: "##common##", service: "all"}:         map[string]interface{}{"paging": false, "team": []interface{}{"ops"}},
+		fieldClassifier{hostgroup: "web", service: "all"}:                map[string]interface{}{"team": []interface{}{"webdev"}, "runbook": "https://wiki.example.org/teams/web/runbooks.html"},
+		fieldClassifier{hostgroup: "web", service: "apache"}:             map[string]interface{}{"paging": true, "runbook": "https://wiki.example.org/teams/cross/runbooks/apache.html"},
+		fieldClassifier{hostgroup: "web", service: "nginx_port"}:         map[string]interface{}{"paging": true},
+		fieldClassifier{hostgroup: "db", service: "all"}:                 map[string]interface{}{"paging": true, "team": []interface{}{"dba", "ops"}, "runbook": "https://wiki.example.org/teams/dba/runbooks.html"},
+		fieldClassifier{hostgroup: "app", service: "swiftWF_error_rate"}: map[string]interface{}{"paging": true, "team": []interface{}{"stats"}, "runbook": "https://wiki.example.org/teams/cross/runbooks/swif_workflows.html", "alertGroup": "AWS_Swift"},
+	}}, expectedErr: ""},
+	{filePath: "nonExistentPath", expectedMap: &customFields{fields: map[fieldClassifier]map[string]interface{}{}}, expectedErr: "stat nonExistentPath: no such file or directory"},
+}
+
+func TestLoad(t *testing.T) {
+	for _, uc := range loadUseCases {
+		custom := &customFields{}
+		err := custom.load(uc.filePath)
+		if !reflect.DeepEqual(uc.expectedMap, custom) {
+			t.Fatalf("Expecting load to generate the map %v. Got: %v\n", uc.expectedMap, custom)
+		}
+		if err != nil {
+			if err.Error() != uc.expectedErr {
+				t.Fatalf("Expecting load of %s to return the error \"%s\". Got: \"%s\"\n", uc.filePath, uc.expectedErr, err)
+			}
+		} else {
+			if uc.expectedErr != "" {
+				t.Fatalf("Expecting load of %s to return the error \"%s\". Got: \"%s\"\n", uc.filePath, uc.expectedErr, err)
+			}
+		}
+	}
+}
