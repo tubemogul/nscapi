@@ -72,7 +72,7 @@ func (f *customFields) lookup(reference map[string]interface{}, key *fieldClassi
 
 // get returns a hash containing the custom fields specific for this hostname and checkName
 func (f *customFields) get(hostname, checkName string) map[string]interface{} {
-	re, _ := regexp.Compile("[^A-Za-z0-9]$")
+	re, _ := regexp.Compile("[0-9]*$")
 	hostgroup := re.ReplaceAllString(hostname, "")
 	resultFields := make(map[string]interface{})
 	f.lookup(resultFields, &fieldClassifier{"##common##", "all"})
