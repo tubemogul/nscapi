@@ -1,0 +1,4 @@
+---
+paging: true
+team: [ dba, ops ]
+runbook: https://wiki.example.org/teams/dba/runbooks.html
