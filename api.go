@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -36,6 +37,13 @@ func ToJSONString(v interface{}) string {
 	return string(bytesOutput)
 }
 
+// We need to remove newline characters
+// to have valid JSON output
+// because it breaks it in other case
+func sanitizeJSONString(str string) string {
+	return strings.Replace(str, "\n", " ", -1)
+}
+
 // rootHandler just renders the root.tmpl that explains the api calls usage
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	tmplPath := filepath.Join(tmplRoot, "root.tmpl")
@@ -59,7 +67,7 @@ func reportsHandler(w http.ResponseWriter, r *http.Request) {
 		j := 1
 		for svc, chk := range svcs {
 			c := map[string]map[string]interface{}{
-				"check": map[string]interface{}{"host": host, "name": svc, "status": statusString(chk.state), "message": chk.output, "timestamp": fmt.Sprint(chk.timestamp), "statusFirstSeen": fmt.Sprint(chk.statusFirstSeen)},
+				"check": map[string]interface{}{"host": host, "name": svc, "status": statusString(chk.state), "message": sanitizeJSONString(chk.output), "timestamp": fmt.Sprint(chk.timestamp), "statusFirstSeen": fmt.Sprint(chk.statusFirstSeen)},
 				// custom will be used to inject custom-defined fields
 				"custom": cFields.get(host, svc),
 			}
